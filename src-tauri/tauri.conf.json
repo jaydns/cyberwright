@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "npm run build",
-    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "if [ \"$SKIP_BUILD\" = \"true\" ]; then echo \"Skipping build\"; else npm run build; fi",
+    "beforeDevCommand": "if [ \"$SKIP_BUILD\" = \"true\" ]; then echo \"Skipping build\"; else npm run dev; fi",
     "devPath": "http://localhost:3000",
     "distDir": "../out"
   },
@@ -29,7 +29,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.codeanalyzer.app",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
