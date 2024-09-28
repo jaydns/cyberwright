@@ -1,7 +1,7 @@
-import '@mantine/core/styles.css';
+import "@mantine/core/styles.css";
 
-import type { AppProps } from 'next/app';
-import { createTheme, MantineProvider } from '@mantine/core';
+import type { AppProps } from "next/app";
+import { createTheme, MantineProvider } from "@mantine/core";
 import "../styles/globals.css";
 
 const theme = createTheme({
@@ -16,14 +16,14 @@ const theme = createTheme({
       "#2df0ae",
       "#1fd698",
       "#0bbe86",
-      "#00a572"
-    ]
-  }
+      "#00a572",
+    ],
+  },
 });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <MantineProvider theme={theme} defaultColorScheme='dark'>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <Component {...pageProps} />
     </MantineProvider>
   );
