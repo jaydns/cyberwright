@@ -8,3 +8,7 @@
     --foreground: #ededed;
   }
 }
+
+html, body {
+  background: transparent;
+}
