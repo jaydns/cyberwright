@@ -7,6 +7,9 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    colors: {
+      "mint-green": "#1fd698",
+    },
     extend: {
       colors: {
         background: "var(--background)",
@@ -15,5 +18,8 @@ const config: Config = {
     },
   },
   plugins: [],
+  corePlugins: {
+    preflight: false
+  }
 };
 export default config;
