@@ -1,7 +1,10 @@
 import { Button } from "@mantine/core";
 import { FolderUp } from "lucide-react";
 
+
 export default function Home() {
+
+
   return (
     <div className="flex flex-col w-screen h-screen items-center justify-center">
       <div className="text-center">
