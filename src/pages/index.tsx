@@ -1,25 +1,26 @@
-import Editor from '@monaco-editor/react';
+import { Button } from "@mantine/core";
+import { FolderUp } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className='flex flex-row'>
-      <div className='flex w-1/5 bg-transparent flex-col pl-2 pt-1'>
-        <h1>test</h1>
-        <h1>test2</h1>
+    <div className='flex flex-col w-screen h-screen items-center justify-center'>
+      <div className="text-center">
+        <h1 
+          className="font-bold text-5xl bg-gradient-to-r from-[#1fd698] to-[#d1fef0] bg-clip-text text-transparent pb-1"
+        >
+          Cyberwright
+        </h1>
+        <p className="text-xl mb-7">
+          "Cybersecurity done right"
+        </p>
       </div>
-      <div className="flex w-1/5 bg-black"> 
-      <div className='flex text-red-700 pl-30 pt-1'>
-        <h1>1</h1>
-      </div>
-      </div>
-      <Editor 
-        height="100vh" 
-        defaultLanguage="javascript" 
-        defaultValue="// some comment"
-        theme='vs-dark'
-        className='w-4/5'
-        options={{ readOnly: true }}
-      />
+      <Button 
+        color="green.8" 
+        variant="light"
+        leftSection={<FolderUp />}
+      >
+        Open Folder
+      </Button>
     </div>
   );
 }
