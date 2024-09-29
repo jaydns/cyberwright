@@ -1,14 +1,15 @@
-import Editor from "@monaco-editor/react";
-import { ChevronDown, File } from "lucide-react";
-import React, { useState, useEffect } from 'react';
-import { Tree, Group } from '@mantine/core';
-import { useSearchParams } from 'next/navigation';
 import { FileStructure } from "@/types";
+import { javascript } from '@codemirror/lang-javascript';
+import { Group, Tree, TreeNodeData } from '@mantine/core';
 import { invoke } from "@tauri-apps/api/tauri";
+import CodeMirror from '@uiw/react-codemirror';
+import { ChevronDown, File } from "lucide-react";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Landing() {
   const params = useSearchParams();
-  const [treeData, setTreeData] = useState<any[]>([]);
+  const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const dirPath = params.get("path");
@@ -34,7 +35,7 @@ export default function Landing() {
   }, [dirPath]);
 
   const recurse_node = (file: FileStructure) => {
-    let fileData: any = {
+    const fileData: TreeNodeData = {
       label: file.name,
       value: file.full_path,
     };
@@ -44,7 +45,7 @@ export default function Landing() {
     return fileData;
   };
 
-  const handleFileOpen = (file_path: any) => {
+  const handleFileOpen = (file_path: string) => {
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
       console.log(data)
       setEditorData(data);
@@ -83,7 +84,7 @@ export default function Landing() {
         )}
       </div>
       <div className="w-4/5 h-screen flex flex-col">
-        <Editor
+        {/* <Editor
           className="mb-0"
           defaultLanguage="test"
           defaultValue=""
@@ -91,7 +92,8 @@ export default function Landing() {
           theme="vs-dark"
           options={{ readOnly: true }}
 
-        />
+        /> */}
+        <CodeMirror value={editorData} extensions={[javascript()]} />
         <div className="h-1/5 mb-0 mt-0 bg-[#121212]">
           <h1 className="text-center">D1 YAPPING</h1>
         </div>
