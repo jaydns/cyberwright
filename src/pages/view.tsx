@@ -3,7 +3,7 @@ import { dialog, FileStructure } from "@/types";
 import { transformDiagnostics } from "@/utils";
 import { javascript } from '@codemirror/lang-javascript';
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
-import { Anchor, Breadcrumbs, Button, Collapse, Group, Progress, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Anchor, Badge, Breadcrumbs, Button, Collapse, Group, Loader, Progress, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
@@ -37,6 +37,7 @@ export default function Landing() {
   const [diagnosticsLoading, setDiagnosticsLoading] = useState(true);
   const [opened, { toggle }] = useDisclosure(false);
   const [firstOpened, setFirstOpened] = useState(false);
+  const [openLoader, setOpenLoader] = useState(false)
 
   const router = useRouter();
 
@@ -82,17 +83,19 @@ export default function Landing() {
       handleTabChange(file_name);
       return;
     }
+
+    setOpenLoader(true);
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
       const newTab: TabStruct = { file_name: file_name, file_content: data, file_path: file_path }
       let newTabs = [newTab, ...tabs];
       setTabs(newTabs);
       setActiveTab(file_name);
       if (!firstOpened) {
-        toggle();
         setFirstOpened(true);
       }
       setEditorData(newTab?.file_content || "");
       setDiagnostics([]);
+      setOpenLoader(false);
     })
   };
 
@@ -190,11 +193,6 @@ export default function Landing() {
     setActiveTab(file_name.file_name);
   }
 
-  const diag: dialog = {
-    content: "dwljdaljdajwjdwkakdwak",
-    id: 1
-  }
-
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
@@ -231,8 +229,8 @@ export default function Landing() {
           </ScrollArea>
         )}
       </div>
-      <div className="w-4/5 h-screen flex flex-col bg-[#272c35]">
-        <ScrollArea className={`${tabs.length == 0 ? "" : "min-h-16"}`} scrollbarSize={0}>
+      <div className="w-4/5 h-screen flex flex-col bg-[#272c35] pointer-events-none">
+        <ScrollArea className={`pointer-events-auto ${tabs.length == 0 ? "" : "min-h-16"}`} scrollbarSize={0}>
           <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
             <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
               <Tabs.List className="flex-nowrap">
@@ -262,17 +260,25 @@ export default function Landing() {
             </Tabs>
           </div>
         </ScrollArea>
-        <Breadcrumbs className="pl-4">
+        <Breadcrumbs className="pl-4 pointer-events-auto">
           {items}
         </Breadcrumbs>
-        <ScrollArea className={!firstOpened ? "hidden" : ""}>
-          <CodeMirror
-            value={editorData}
-            extensions={[javascript(), linter((() => diagnostics)), lintGutter()]}
-            theme={atomone}
-            className="pb-52"
-            readOnly
-          />
+        <ScrollArea className={!firstOpened ? "hidden" : "pointer-events-auto"}>
+          {
+            openLoader ? 
+            <div className="w-4/5 h-screen flex items-center justify-center flex-col">
+              <Loader color="green"/>
+              <h1>Loading your file...</h1>
+            </div> :
+            <CodeMirror
+              value={editorData}
+              extensions={editorData.length != 0 ? [javascript(), linter((() => diagnostics)), lintGutter()] : []}
+              theme={atomone}
+              className="pb-52"
+              readOnly
+            />
+          }
+          
         </ScrollArea>
         {!firstOpened && 
           <div className="w-4/5 h-screen flex justify-center flex-col items-center">
@@ -283,14 +289,14 @@ export default function Landing() {
           </div>
         }
         <div className={`fixed bottom-0 w-4/5 h-2/4 ${!firstOpened && "hidden"}`}>
-          <Button onClick={toggle} className={`rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
+          <Button onClick={toggle} className={`rounded-tr-lg z-10 pointer-events-auto ${!opened ? "absolute bottom-0 right-0 transition-all duration-200" : "right-0 absolute"}`} color="black">
             {
               opened ?
-                <Minus color="#1fd698" /> :
-                <Plus color="#1fd698" />
+                <X color="#1fd698" className="mt-4"/> :
+                diagnosticsLoading ? <Loader color="green"></Loader> : diagnostics.length > 0 ? <Badge size="lg" circle color="red" className="text-xl">{diagnostics.length}</Badge> :  <Plus color="#1fd698" />
             }
           </Button>
-          <Collapse in={opened} className="h-full bg-black mt-0 pt-3">
+          <Collapse in={opened} className={`h-full bg-black mt-0 pt-3`}>
 
             {diagnosticsLoading ? (<>
               <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
@@ -307,7 +313,7 @@ export default function Landing() {
                 <div className="h-full">
                   {diagnostics.map((diag, index) => {
                     return (
-                      <AiDialog key={index} content={diag.message} id={index} />
+                      <AiDialog key={index + 1} content={diag.message} id={index + 1} />
                     )
                   })}
                 </div>
@@ -321,7 +327,3 @@ export default function Landing() {
     </div>
   );
 }
-
-
-// TODO:
-// Go back to home page arrow
