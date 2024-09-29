@@ -2,7 +2,7 @@ import { leetLinter } from "@/1337source";
 import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
 import { linter, lintGutter } from '@codemirror/lint';
-import { Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Button, Group, ScrollArea, Tabs, Tree, TreeNodeData, Breadcrumbs, Anchor} from '@mantine/core';
 import { invoke } from "@tauri-apps/api/tauri";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 interface TabStruct {
   file_name: string,
   file_content: string,
+  file_path: string,
 }
 
 export default function Landing() {
@@ -24,6 +25,7 @@ export default function Landing() {
   const [editorData, setEditorData] = useState<string>("");
   const [tabs, setTabs] = useState<TabStruct[]>([]);
   const [activeTab, setActiveTab] = useState("");
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -56,12 +58,19 @@ export default function Landing() {
   };
 
   const handleFileOpen = (file_path: string, file_name: any) => {
+    const section:any = file_path.replace(/\\/g , '/').split("/");
+    const items = section.map((item:string, index:any) => (
+      <Anchor key={index} className="text-sm">
+        {item}
+      </Anchor>
+    ))
+    setItems(items);
     if (tabs.find((tab) => tab.file_name == file_name)) {
       setActiveTab(file_name);
       return;
     }
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
-      const newTab: TabStruct = { file_name: file_name, file_content: data }
+      const newTab: TabStruct = { file_name: file_name, file_content: data, file_path: file_path }
       let newTabs = [newTab, ...tabs];
       setTabs(newTabs);
       setEditorData(data);
@@ -73,7 +82,7 @@ export default function Landing() {
     if (!struct) {
       return
     }
-    setActiveTab(file_name);
+    setBreadCrumbs(struct);
     setEditorData(struct?.file_content || "");
   }
 
@@ -93,6 +102,16 @@ export default function Landing() {
     }
   }
 
+  const setBreadCrumbs = (file_name:TabStruct) => {
+    var section:any = file_name.file_path.replace(/\\/g , '/').split("/");
+    const items = section.map((item:string, index:any) => (
+      <Anchor key={index} className="text-sm">
+        {item}
+      </Anchor>
+    ))
+    setItems(items);
+    setActiveTab(file_name.file_name);
+  }
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
@@ -149,6 +168,9 @@ export default function Landing() {
             </Tabs.List>
           </Tabs>
         </ScrollArea.Autosize>
+        <Breadcrumbs className="pl-4">
+          {items}
+        </Breadcrumbs>
         <ScrollArea>
           <CodeMirror
             value={editorData}
