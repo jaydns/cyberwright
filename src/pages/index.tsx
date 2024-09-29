@@ -2,7 +2,7 @@ import { Button } from "@mantine/core";
 import { FolderUp } from "lucide-react";
 import { useRef } from "react";
 import { useRouter } from "next/router";
-import { open } from "@tauri-apps/api/dialog";
+import { open } from "@tauri-apps/plugin-dialog";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
