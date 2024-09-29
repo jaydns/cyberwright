@@ -16,8 +16,8 @@ export function transformDiagnostics(input: string | AiFormat, fileContent?: str
         const to = from + (line ? line.length : 0);
 
         return {
-            from: from - 1,
-            to: to - 1,
+            from: from,
+            to: to,
             severity: issue.severity === 'critical' ? 'error' : 'warning',
             message: issue.synopsis,
         };
