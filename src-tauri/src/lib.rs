@@ -5,7 +5,6 @@ use std::cmp::Ordering;
 use std::fs;
 use std::path::Path;
 use tauri::Manager;
-use tokio::runtime::Runtime;
 use window_vibrancy::{apply_acrylic, apply_blur, apply_vibrancy, NSVisualEffectMaterial};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -96,68 +95,64 @@ fn add_line_numbers(text: &str) -> String {
 }
 
 #[tauri::command]
-fn get_ai_response(content: String) -> Result<String, String> {
-    let runtime = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
+async fn get_ai_response(content: String) -> Result<String, String> {
+    // hardcoded api key lets GOOOO
+    let api_key = "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".to_string();
+    // let api_key = "ollama".to_string();
 
-    runtime.block_on(async {
-        // hardcoded api key lets GOOOO
-        let api_key = "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".to_string();
-        // let api_key = "ollama".to_string();
+    let client = reqwest::Client::new();
 
-        let client = reqwest::Client::new();
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+    headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("Bearer {}", api_key)).map_err(|e| e.to_string())?,
+    );
 
-        let mut headers = HeaderMap::new();
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        headers.insert(
-            AUTHORIZATION,
-            HeaderValue::from_str(&format!("Bearer {}", api_key)).map_err(|e| e.to_string())?,
-        );
-
-        let body = json!({
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are an application that identifies vulnerabilities in code.\nIgnore vulnerabilities that cannot be exploited, or are negligible.\nLine numbers are included in your input.\n\nReturn JSON in the following format:\n\n{\n    \"issues\": [\n        { \"lineNumber\": 1, \"severity\": \"warning\" | \"critical\", \"synopsis: \"A short description of the vulnerability, including suggested remediation. Include the function signature or responsible code, in backticks, if applicable.\" }\n    ]\n}"
-                },
-                {
-                    "role": "user",
-                    "content": add_line_numbers(content.as_str())
-                }
-            ],
-            "model": "llama-3.1-70b-versatile", // groq
-            // "model": "llama3.1:70b", // ollama
-            "temperature": 0,
-            "max_tokens": 1024,
-            "top_p": 1,
-            "stream": false,
-            "response_format": {
-                "type": "json_object"
+    let body = json!({
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are an application that identifies vulnerabilities in code.\nIgnore vulnerabilities that cannot be exploited, or are negligible.\nLine numbers are included in your input.\n\nReturn JSON in the following format:\n\n{\n    \"issues\": [\n        { \"lineNumber\": 1, \"severity\": \"warning\" | \"critical\", \"synopsis: \"A short description of the vulnerability, including suggested remediation. Include the function signature or responsible code, in backticks, if applicable.\" }\n    ]\n}"
             },
-            "stop": null
-        });
+            {
+                "role": "user",
+                "content": add_line_numbers(content.as_str())
+            }
+        ],
+        "model": "llama-3.1-70b-versatile", // groq
+        // "model": "llama3.1:70b", // ollama
+        "temperature": 0,
+        "max_tokens": 1024,
+        "top_p": 1,
+        "stream": false,
+        "response_format": {
+            "type": "json_object"
+        },
+        "stop": null
+    });
 
-        let response = client
-            .post("https://api.groq.com/openai/v1/chat/completions")
-            // .post("http://localhost:11434/v1/chat/completions")
-            .headers(headers)
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| e.to_string())?;
+    let response = client
+        .post("https://api.groq.com/openai/v1/chat/completions")
+        // .post("http://localhost:11434/v1/chat/completions")
+        .headers(headers)
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
 
-        if !response.status().is_success() {
-            return Err(format!("req failed: {}", response.status()));
-        }
+    if !response.status().is_success() {
+        return Err(format!("req failed: {}", response.status()));
+    }
 
-        let response_body: Value = response.json().await.map_err(|e| e.to_string())?;
+    let response_body: Value = response.json().await.map_err(|e| e.to_string())?;
 
-        let content = response_body["choices"][0]["message"]["content"]
-            .as_str()
-            .ok_or("Failed to extract content from response")?
-            .to_string();
+    let content = response_body["choices"][0]["message"]["content"]
+        .as_str()
+        .ok_or("Failed to extract content from response")?
+        .to_string();
 
-        Ok(content)
-    })
+    Ok(content)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
