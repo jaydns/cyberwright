@@ -40,8 +40,8 @@
       }
     }
   },
-  "productName": "codeanalyzer",
-  "mainBinaryName": "codeanalyzer",
+  "productName": "Cyberwright",
+  "mainBinaryName": "Cyberwright",
   "version": "0.1.0",
   "identifier": "com.cyberwright.app",
   "plugins": {},
@@ -49,10 +49,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 800,
         "resizable": true,
         "title": "Cyberwright",
-        "width": 800,
+        "width": 1200,
         "transparent": true,
         "visible": true
       },

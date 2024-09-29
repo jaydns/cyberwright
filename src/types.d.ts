@@ -20,3 +20,8 @@ export interface dialog {
   id: number,
   severity: string,
 }
+
+export interface recent_open {
+  folder_path: string,
+  fodler_name: string
+}
