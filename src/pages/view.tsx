@@ -8,13 +8,14 @@ import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
-import { ChevronDown, File, Minus, Plus, X } from "lucide-react";
+import { ChevronDown, File, Minus, Plus, X, ChevronLeft } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiLogoTypescript } from "react-icons/bi";
 import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { LuFileJson } from "react-icons/lu";
+import { useRouter } from "next/router";
 
 interface TabStruct {
   file_name: string,
@@ -36,6 +37,8 @@ export default function Landing() {
   const [diagnosticsLoading, setDiagnosticsLoading] = useState(true);
   const [opened, { toggle }] = useDisclosure(false);
   const [firstOpened, setFirstOpened] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!dirPath) return;
@@ -195,6 +198,9 @@ export default function Landing() {
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
+        <Button variant="transparent" color="green" className="w-fit pl-0" onClick={() => router.push("/")}>
+          <ChevronLeft size={23}/>
+        </Button>
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
@@ -226,7 +232,7 @@ export default function Landing() {
         )}
       </div>
       <div className="w-4/5 h-screen flex flex-col bg-[#272c35]">
-        <ScrollArea className="min-h-16" scrollbarSize={0}>
+        <ScrollArea className={`${tabs.length == 0 ? "" : "min-h-16"}`} scrollbarSize={0}>
           <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
             <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
               <Tabs.List className="flex-nowrap">
@@ -269,7 +275,7 @@ export default function Landing() {
           />
         </ScrollArea>
         <div className="fixed bottom-0 w-4/5 h-2/4">
-          <Button onClick={toggle} className={`mb-0 rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
+          <Button onClick={toggle} className={`rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
             {
               opened ?
                 <Minus color="#1fd698" /> :
@@ -310,5 +316,4 @@ export default function Landing() {
 
 
 // TODO:
-// Syntax highlighting by matching file exts
 // Go back to home page arrow
