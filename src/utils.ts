@@ -1,7 +1,7 @@
 import { Diagnostic } from "@codemirror/lint";
 import { AiFormat } from "./types";
 
-function transformDiagnostics(input: string | AiFormat, fileContent?: string): Diagnostic[] {
+export function transformDiagnostics(input: string | AiFormat, fileContent?: string): Diagnostic[] {
     let parsedInput: AiFormat;
 
     if (typeof input === 'string') {
@@ -16,8 +16,8 @@ function transformDiagnostics(input: string | AiFormat, fileContent?: string): D
         const to = from + (line ? line.length : 0);
 
         return {
-            from,
-            to,
+            from: from - 1,
+            to: to - 1,
             severity: issue.severity === 'critical' ? 'error' : 'warning',
             message: issue.synopsis,
         };

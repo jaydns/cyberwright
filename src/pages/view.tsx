@@ -1,8 +1,9 @@
 import AiDialog from "@/components/aiDialog";
 import { dialog, FileStructure } from "@/types";
+import { transformDiagnostics } from "@/utils";
 import { javascript } from '@codemirror/lang-javascript';
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
-import { Anchor, Breadcrumbs, Button, Collapse, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Anchor, Breadcrumbs, Button, Collapse, Group, Progress, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
@@ -32,7 +33,9 @@ export default function Landing() {
   const [activeTab, setActiveTab] = useState("");
   const [items, setItems] = useState([]);
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
-  const [opened, { toggle }] = useDisclosure(true);
+  const [diagnosticsLoading, setDiagnosticsLoading] = useState(true);
+  const [opened, { toggle }] = useDisclosure(false);
+  const [firstOpened, setFirstOpened] = useState(false);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -81,9 +84,23 @@ export default function Landing() {
       let newTabs = [newTab, ...tabs];
       setTabs(newTabs);
       setActiveTab(file_name);
+      if (!firstOpened) {
+        toggle();
+        setFirstOpened(true);
+      }
       setEditorData(newTab?.file_content || "");
+      setDiagnostics([]);
     })
   };
+
+  useEffect(() => {
+    if (!editorData) return;
+    setDiagnosticsLoading(true);
+    invoke<string>("get_ai_response", { content: editorData }).then(res => {
+      setDiagnostics(transformDiagnostics(res, editorData));
+      setDiagnosticsLoading(false);
+    });
+  }, [editorData])
 
   const handleTabChange = (file_name: any) => {
     let struct = tabs.find((tab) => tab.file_name == file_name);
@@ -260,24 +277,30 @@ export default function Landing() {
             }
           </Button>
           <Collapse in={opened} className="h-full bg-black mt-0 pt-3">
-            <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
-              <h1>You haven't scanned this file yet! Click to scan.</h1>
-              <Button
-                className=""
-                color="green"
-                size="lg"
-              >
-                Scan Now
-              </Button>
-            </div>
-            <ScrollArea className="mx-20 max-w-full hidden" h={300}>
-              <AiDialog {...diag} />
-              <AiDialog {...diag} />
-              <AiDialog {...diag} />
-              <AiDialog {...diag} />
-              <AiDialog {...diag} />
-              <AiDialog {...diag} />
-            </ScrollArea>
+
+            {diagnosticsLoading ? (<>
+              <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
+                <h1>Analyzing...</h1>
+                <Progress className={"w-1/2"} color="green" size="xl" value={100} animated />
+              </div>
+            </>
+            ) : (
+              diagnostics.length == 0 ? (
+                <div className="flex flex-col h-full items-center justify-center text-center">
+                  <h1>No issues found!</h1>
+                </div>
+              ) : (
+                <div className="h-full">
+                  {diagnostics.map((diag, index) => {
+                    return (
+                      <AiDialog key={index} content={diag.message} id={index} />
+                    )
+                  })}
+                </div>
+              )
+            )
+            }
+
           </Collapse>
         </div>
       </div>

@@ -1,21 +1,12 @@
 import { Button } from "@mantine/core";
-import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderUp } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
-
-  const [test, setTest] = useState<string>("");
-
-  useEffect(() => {
-    invoke<string>("get_ai_response", { content: "print('hello world!')" }).then(res => {
-      setTest(res);
-    });
-  }, []);
 
   function handleInput(e: any) {
     open({
@@ -36,7 +27,6 @@ export default function Home() {
           Cyberwright
         </h1>
         <p className="text-xl mt-0">&quot;Cybersecurity done right&quot;</p>
-        <p>sigma {test}</p>
       </div>
 
       <Button
