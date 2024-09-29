@@ -15,3 +15,7 @@ interface AiIssue {
 interface AiFormat {
   issues: AiIssue[];
 }
+export interface dialog {
+  content: string,
+  id: number
+}

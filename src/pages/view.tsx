@@ -1,11 +1,13 @@
-import { FileStructure } from "@/types";
+import AiDialog from "@/components/aiDialog";
+import { dialog, FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
-import { Anchor, Breadcrumbs, Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Anchor, Breadcrumbs, Button, Collapse, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
-import { ChevronDown, File, X } from "lucide-react";
+import { ChevronDown, File, Minus, Plus, X } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiLogoTypescript } from "react-icons/bi";
@@ -30,6 +32,7 @@ export default function Landing() {
   const [activeTab, setActiveTab] = useState("");
   const [items, setItems] = useState([]);
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
+  const [opened, { toggle }] = useDisclosure(true);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -166,6 +169,12 @@ export default function Landing() {
     setItems(items);
     setActiveTab(file_name.file_name);
   }
+
+  const diag: dialog = {
+    content: "dwljdaljdajwjdwkakdwak",
+    id: 1
+  }
+
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
@@ -242,10 +251,41 @@ export default function Landing() {
             readOnly
           />
         </ScrollArea>
-        <div className="h-1/5 mb-0 mt-0 bg-[#121212] w-4/5 fixed bottom-0">
-          <h1 className="text-center">D1 YAPPING</h1>
+        <div className="fixed bottom-0 w-4/5 h-2/4">
+          <Button onClick={toggle} className={`mb-0 rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
+            {
+              opened ?
+                <Minus color="#1fd698" /> :
+                <Plus color="#1fd698" />
+            }
+          </Button>
+          <Collapse in={opened} className="h-full bg-black mt-0 pt-3">
+            <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
+              <h1>You haven't scanned this file yet! Click to scan.</h1>
+              <Button
+                className=""
+                color="green"
+                size="lg"
+              >
+                Scan Now
+              </Button>
+            </div>
+            <ScrollArea className="mx-20 max-w-full hidden" h={300}>
+              <AiDialog {...diag} />
+              <AiDialog {...diag} />
+              <AiDialog {...diag} />
+              <AiDialog {...diag} />
+              <AiDialog {...diag} />
+              <AiDialog {...diag} />
+            </ScrollArea>
+          </Collapse>
         </div>
       </div>
     </div>
   );
 }
+
+
+// TODO:
+// Syntax highlighting by matching file exts
+// Go back to home page arrow
