@@ -15,11 +15,13 @@ export default function Home() {
   const [recentOpens, setRecentOpens] = useState<recent_open[]>([]);
 
   useEffect(() => {
-    store.get("recent_opens").then((data: any) => {
+    store.get<recent_open[]>("recent_opens").then((data) => {
       if (!data) {
         return;
       }
-      setRecentOpens(data);
+      setRecentOpens(data.filter((obj1, i, arr) =>
+        arr.findIndex(obj2 => (obj2.folder_path === obj1.folder_path)) === i
+      ).slice(0, 3));
     })
   }, []);
 
