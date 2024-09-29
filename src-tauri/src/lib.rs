@@ -1,16 +1,17 @@
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::cmp::Ordering;
 use std::fs;
 use std::path::Path;
 use tauri::Manager;
 use tokio::runtime::Runtime;
 use window_vibrancy::{apply_acrylic, apply_blur, apply_vibrancy, NSVisualEffectMaterial};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 enum FileType {
-    File,
     Directory,
+    File,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -20,6 +21,29 @@ struct FileNode {
     full_path: String,
     children: Option<Vec<FileNode>>,
 }
+
+impl Ord for FileNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.file_type.cmp(&other.file_type) {
+            Ordering::Equal => self.name.cmp(&other.name),
+            other => other,
+        }
+    }
+}
+
+impl PartialOrd for FileNode {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for FileNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.file_type == other.file_type && self.name == other.name
+    }
+}
+
+impl Eq for FileNode {}
 
 fn build_file_structure(path: &Path) -> Result<FileNode, std::io::Error> {
     let metadata = fs::metadata(path)?;
@@ -36,6 +60,7 @@ fn build_file_structure(path: &Path) -> Result<FileNode, std::io::Error> {
             let child = build_file_structure(&entry.path())?;
             children.push(child);
         }
+        children.sort();
         Ok(FileNode {
             name,
             file_type: FileType::Directory,
