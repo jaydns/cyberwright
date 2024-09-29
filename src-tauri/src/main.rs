@@ -17,6 +17,7 @@ enum FileType {
 struct FileNode {
     name: String,
     file_type: FileType,
+    full_path: String,
     children: Option<Vec<FileNode>>,
 }
 
@@ -38,12 +39,14 @@ fn build_file_structure(path: &Path) -> Result<FileNode, std::io::Error> {
         Ok(FileNode {
             name,
             file_type: FileType::Directory,
+            full_path: path.to_str().unwrap().to_string(),
             children: Some(children),
         })
     } else {
         Ok(FileNode {
             name,
             file_type: FileType::File,
+            full_path: path.to_str().unwrap().to_string(),
             children: None,
         })
     }
