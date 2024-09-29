@@ -23,5 +23,5 @@ export interface dialog {
 
 export interface recent_open {
   folder_path: string,
-  fodler_name: string
+  folder_name: string
 }

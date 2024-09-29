@@ -5,7 +5,9 @@ use std::cmp::Ordering;
 use std::fs;
 use std::path::Path;
 use tauri::Manager;
-use window_vibrancy::{apply_acrylic, apply_blur, apply_vibrancy, NSVisualEffectMaterial};
+use window_vibrancy::{
+    apply_acrylic, apply_blur, apply_mica, apply_vibrancy, NSVisualEffectMaterial,
+};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 enum FileType {
@@ -168,7 +170,7 @@ pub fn run() {
                 .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
             #[cfg(target_os = "windows")]
-            apply_acrylic(&window, Some((18, 18, 18, 125)))
+            apply_mica(&window, Some((18, 18, 18, 125)))
                 .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
 
             Ok(())
