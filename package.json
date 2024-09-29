@@ -21,6 +21,7 @@
     "@monaco-editor/react": "^4.6.0",
     "@tauri-apps/api": "^2.0.0-rc.0",
     "@tauri-apps/plugin-dialog": "^2.0.0-rc.1",
+    "@tauri-apps/plugin-http": "^2.0.0-rc.2",
     "@tauri-apps/plugin-store": "^2.0.0-rc.1",
     "@uiw/codemirror-theme-atomone": "^4.23.3",
     "@uiw/react-codemirror": "^4.23.3",

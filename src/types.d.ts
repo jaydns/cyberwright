@@ -4,3 +4,14 @@ export interface FileStructure {
   full_path: string;
   children: FileStructure[] | null;
 }
+
+
+interface AiIssue {
+  lineNumber: number;
+  severity: "warning" | "critical";
+  synopsis: string;
+}
+
+interface AiFormat {
+  issues: AiIssue[];
+}

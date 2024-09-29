@@ -1,7 +1,6 @@
-import { leetLinter } from "@/1337source";
 import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
-import { linter, lintGutter } from '@codemirror/lint';
+import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
 import { Anchor, Breadcrumbs, Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
@@ -30,6 +29,7 @@ export default function Landing() {
   const [tabs, setTabs] = useState<TabStruct[]>([]);
   const [activeTab, setActiveTab] = useState("");
   const [items, setItems] = useState([]);
+  const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -201,34 +201,34 @@ export default function Landing() {
       </div>
       <div className="w-4/5 h-screen flex flex-col bg-[#272c35]">
         <ScrollArea className="min-h-16" scrollbarSize={0}>
-        <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
-          <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
-            <Tabs.List className="flex-nowrap">
-              {
-                tabs.map((tab) => {
-                  return (
-                    <Tabs.Tab value={tab.file_name} key={tab.file_name} color={"green"}>
-                      <div className="flex items-center">
-                        <div className="flex">
-                          {matchFileExtension(tab.file_name)}
-                          <span className="ml-2">{tab.file_name}</span>
+          <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
+            <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
+              <Tabs.List className="flex-nowrap">
+                {
+                  tabs.map((tab) => {
+                    return (
+                      <Tabs.Tab value={tab.file_name} key={tab.file_name} color={"green"}>
+                        <div className="flex items-center">
+                          <div className="flex">
+                            {matchFileExtension(tab.file_name)}
+                            <span className="ml-2">{tab.file_name}</span>
+                          </div>
+                          <Button
+                            onClick={() => handleClose(tab.file_name)}
+                            variant="transparent"
+                            className="w-fit h-fit pr-0"
+                            color="green"
+                          >
+                            <X width={15} />
+                          </Button>
                         </div>
-                        <Button
-                          onClick={() => handleClose(tab.file_name)}
-                          variant="transparent"
-                          className="w-fit h-fit pr-0"
-                          color="green"
-                        >
-                          <X width={15} />
-                        </Button>
-                      </div>
-                    </Tabs.Tab>
-                  )
-                })
-              }
-            </Tabs.List>
-          </Tabs>
-        </div>
+                      </Tabs.Tab>
+                    )
+                  })
+                }
+              </Tabs.List>
+            </Tabs>
+          </div>
         </ScrollArea>
         <Breadcrumbs className="pl-4">
           {items}
@@ -236,7 +236,7 @@ export default function Landing() {
         <ScrollArea className="">
           <CodeMirror
             value={editorData}
-            extensions={[javascript(), linter(leetLinter()), lintGutter()]}
+            extensions={[javascript(), linter((() => diagnostics)), lintGutter()]}
             theme={atomone}
             className="pb-52"
             readOnly
