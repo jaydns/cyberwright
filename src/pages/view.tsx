@@ -265,7 +265,7 @@ export default function Landing() {
         <Breadcrumbs className="pl-4">
           {items}
         </Breadcrumbs>
-        <ScrollArea className="">
+        <ScrollArea className={!firstOpened ? "hidden" : ""}>
           <CodeMirror
             value={editorData}
             extensions={[javascript(), linter((() => diagnostics)), lintGutter()]}
@@ -274,7 +274,15 @@ export default function Landing() {
             readOnly
           />
         </ScrollArea>
-        <div className="fixed bottom-0 w-4/5 h-2/4">
+        {!firstOpened && 
+          <div className="w-4/5 h-screen flex justify-center flex-col items-center">
+            <h1 className="font-bold text-5xl bg-gradient-to-r from-[#1fd698] to-[#d1fef0] bg-clip-text text-transparent pb-1 mb-0">
+              Cyberwright
+            </h1>
+            <h1 className="mt-0">Open a file to get started</h1>
+          </div>
+        }
+        <div className={`fixed bottom-0 w-4/5 h-2/4 ${!firstOpened && "hidden"}`}>
           <Button onClick={toggle} className={`rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
             {
               opened ?
