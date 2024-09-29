@@ -3,7 +3,7 @@ import { dialog, FileStructure } from "@/types";
 import { transformDiagnostics } from "@/utils";
 import { javascript } from '@codemirror/lang-javascript';
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint';
-import { Anchor, Badge, Breadcrumbs, Button, Collapse, Group, Loader, Progress, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Alert, Anchor, Badge, Breadcrumbs, Button, Collapse, Group, Loader, Progress, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
@@ -16,6 +16,7 @@ import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar } fro
 import { FaGear } from "react-icons/fa6";
 import { LuFileJson } from "react-icons/lu";
 import { useRouter } from "next/router";
+import { notifications } from "@mantine/notifications";
 
 interface TabStruct {
   file_name: string,
@@ -72,6 +73,7 @@ export default function Landing() {
   };
 
   const handleFileOpen = (file_path: string, file_name: any) => {
+    setOpenLoader(true);
     const section: any = file_path.replace(/\\/g, '/').split("/");
     const items = section.map((item: string, index: any) => (
       <Anchor key={index} className="text-sm" c="green">
@@ -84,7 +86,6 @@ export default function Landing() {
       return;
     }
 
-    setOpenLoader(true);
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
       const newTab: TabStruct = { file_name: file_name, file_content: data, file_path: file_path }
       let newTabs = [newTab, ...tabs];
@@ -105,6 +106,16 @@ export default function Landing() {
     invoke<string>("get_ai_response", { content: editorData }).then(res => {
       setDiagnostics(transformDiagnostics(res, editorData));
       setDiagnosticsLoading(false);
+      const numOfVulns = JSON.parse(res).issues.length;
+      if (numOfVulns > 0) {
+        notifications.show({
+          title: `${numOfVulns} vulnerabilities detected!`,
+          message: "Expand the panel in the bottom right to learn more.",
+          color: "green",
+          autoClose: 2000,
+          position: "top-right"
+        })
+      }
     });
   }, [editorData])
 
@@ -135,6 +146,8 @@ export default function Landing() {
     } else {
       setEditorData("");
       setItems([])
+      setActiveTab("")
+      setDiagnostics([])
     }
   }
 
@@ -263,7 +276,7 @@ export default function Landing() {
         <Breadcrumbs className="pl-4 pointer-events-auto">
           {items}
         </Breadcrumbs>
-        <ScrollArea className={!firstOpened ? "hidden" : "pointer-events-auto"}>
+        <ScrollArea className="pointer-events-auto">
           {
             openLoader ? 
             <div className="w-4/5 h-screen flex items-center justify-center flex-col">
@@ -274,13 +287,13 @@ export default function Landing() {
               value={editorData}
               extensions={editorData.length != 0 ? [javascript(), linter((() => diagnostics)), lintGutter()] : []}
               theme={atomone}
-              className="pb-52"
+              className={`${!firstOpened && "hidden"} pb-52`}
               readOnly
             />
           }
           
         </ScrollArea>
-        {!firstOpened && 
+        {!firstOpened && !openLoader &&
           <div className="w-4/5 h-screen flex justify-center flex-col items-center">
             <h1 className="font-bold text-5xl bg-gradient-to-r from-[#1fd698] to-[#d1fef0] bg-clip-text text-transparent pb-1 mb-0">
               Cyberwright
@@ -293,10 +306,14 @@ export default function Landing() {
             {
               opened ?
                 <X color="#1fd698" className="mt-4"/> :
-                diagnosticsLoading ? <Loader color="green"></Loader> : diagnostics.length > 0 ? <Badge size="lg" circle color="red" className="text-xl">{diagnostics.length}</Badge> :  <Plus color="#1fd698" />
+                diagnosticsLoading ? <Loader color="green"></Loader> : diagnostics.length > 0 ? 
+                <div>
+                  <Badge size="lg" circle color="red" className="text-xl">{diagnostics.length}</Badge>  
+                </div> :
+                <Plus color="#1fd698" />
             }
           </Button>
-          <Collapse in={opened} className={`h-full bg-black mt-0 pt-3`}>
+          <Collapse in={opened} className={`h-full bg-black mt-0 pt-3 ${opened ? "pointer-events-auto" : ""}`}>
 
             {diagnosticsLoading ? (<>
               <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
@@ -310,13 +327,13 @@ export default function Landing() {
                   <h1>No issues found!</h1>
                 </div>
               ) : (
-                <div className="h-full">
+                <ScrollArea className="h-full">
                   {diagnostics.map((diag, index) => {
                     return (
                       <AiDialog key={index + 1} content={diag.message} id={index + 1} />
                     )
                   })}
-                </div>
+                </ScrollArea>
               )
             )
             }

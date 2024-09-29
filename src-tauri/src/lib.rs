@@ -126,7 +126,7 @@ fn get_ai_response(content: String) -> Result<String, String> {
             ],
             "model": "llama-3.1-70b-versatile", // groq
             // "model": "llama3.1:70b", // ollama
-            "temperature": 1,
+            "temperature": 0,
             "max_tokens": 1024,
             "top_p": 1,
             "stream": false,
