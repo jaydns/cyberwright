@@ -8,11 +8,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
-import { ChevronDown, File, Minus, Plus, X, ChevronLeft } from "lucide-react";
+import { ChevronDown, File, Plus, X, ChevronLeft } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiLogoTypescript } from "react-icons/bi";
-import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar } from "react-icons/fa";
+import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar, FaPython } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { LuFileJson } from "react-icons/lu";
 import { useRouter } from "next/router";
@@ -132,8 +132,12 @@ export default function Landing() {
     if (!struct) {
       return
     }
+    if(opened) {
+      toggle()
+    }
     setBreadCrumbs(struct);
     setEditorData(struct?.file_content || "");
+    setOpenLoader(false)
   }
 
   const handleClose = (e: string) => {
@@ -199,6 +203,8 @@ export default function Landing() {
         return <FaStar size={16} color="yellow" />
       case "md":
         return <FaMarkdown size={16} color="green" />
+      case "py":
+        return <FaPython size={16} color="#689be3"/>
       default:
         return <File className="pr-1" size={18} />
     }
@@ -315,7 +321,7 @@ export default function Landing() {
             {
               opened ?
                 <X color="#1fd698" className="mt-4"/> :
-                diagnosticsLoading ? <Loader color="green"></Loader> : diagnostics.length > 0 ? 
+                diagnosticsLoading ? <Loader color="green" size={25}></Loader> : diagnostics.length > 0 ? 
                 <div>
                   <Badge size="lg" circle color="red" className="text-xl">{diagnostics.length}</Badge>  
                 </div> :
@@ -323,7 +329,7 @@ export default function Landing() {
             }
           </Button>
           <Collapse in={opened} className={`h-full bg-black mt-0 pt-3 ${opened ? "pointer-events-auto" : ""}`}>
-
+            <h1 className="ml-10 text-2xl"><u>Vulnerabilities Identified</u></h1>
             {diagnosticsLoading ? (
             <>
               <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
@@ -337,7 +343,7 @@ export default function Landing() {
                   <h1>No issues found!</h1>
                 </div>
               ) : (
-                <ScrollArea className="h-full">
+                <ScrollArea className="h-full pointer-events-auto pb-20" h={"90%"} scrollbars="y">
                   {diagnostics.map((diag, index) => {
                     return (
                       <AiDialog key={index + 1} content={diag.message} id={index + 1} severity={diag.severity}/>
