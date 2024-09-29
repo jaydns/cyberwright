@@ -17,5 +17,6 @@ interface AiFormat {
 }
 export interface dialog {
   content: string,
-  id: number
+  id: number,
+  severity: string,
 }

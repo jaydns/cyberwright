@@ -106,6 +106,7 @@ export default function Landing() {
     invoke<string>("get_ai_response", { content: editorData }).then(res => {
       setDiagnostics(transformDiagnostics(res, editorData));
       setDiagnosticsLoading(false);
+
       const numOfVulns = JSON.parse(res).issues.length;
       if (numOfVulns > 0) {
         notifications.show({
@@ -330,7 +331,7 @@ export default function Landing() {
                 <ScrollArea className="h-full">
                   {diagnostics.map((diag, index) => {
                     return (
-                      <AiDialog key={index + 1} content={diag.message} id={index + 1} />
+                      <AiDialog key={index + 1} content={diag.message} id={index + 1} severity={diag.severity}/>
                     )
                   })}
                 </ScrollArea>
