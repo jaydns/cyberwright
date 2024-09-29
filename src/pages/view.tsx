@@ -2,21 +2,22 @@ import { leetLinter } from "@/1337source";
 import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
 import { linter, lintGutter } from '@codemirror/lint';
-import { Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
-import { invoke } from "@tauri-apps/api/core";
+import { Anchor, Breadcrumbs, Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { invoke } from "@tauri-apps/api/tauri";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
 import { ChevronDown, File, X } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { FaJs, FaCss3Alt, FaFileImage, FaRust, FaHtml5, FaStar, FaMarkdown } from "react-icons/fa";
 import { BiLogoTypescript } from "react-icons/bi";
+import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
 import { LuFileJson } from "react-icons/lu";
 
 interface TabStruct {
   file_name: string,
   file_content: string,
+  file_path: string,
 }
 
 export default function Landing() {
@@ -28,6 +29,7 @@ export default function Landing() {
   const [editorData, setEditorData] = useState<string>("");
   const [tabs, setTabs] = useState<TabStruct[]>([]);
   const [activeTab, setActiveTab] = useState("");
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -60,13 +62,20 @@ export default function Landing() {
   };
 
   const handleFileOpen = (file_path: string, file_name: any) => {
+    const section: any = file_path.replace(/\\/g, '/').split("/");
+    const items = section.map((item: string, index: any) => (
+      <Anchor key={index} className="text-sm">
+        {item}
+      </Anchor>
+    ))
+    setItems(items);
     if (tabs.find((tab) => tab.file_name == file_name)) {
       handleTabChange(file_name);
       return;
     }
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
-      const newTab: TabStruct = { file_name: file_name, file_content: data }
-      let newTabs = [...tabs, newTab];
+      const newTab: TabStruct = { file_name: file_name, file_content: data, file_path: file_path }
+      let newTabs = [newTab, ...tabs];
       setTabs(newTabs);
       setActiveTab(file_name);
       setEditorData(newTab?.file_content || "");
@@ -78,13 +87,13 @@ export default function Landing() {
     if (!struct) {
       return
     }
-    setActiveTab(file_name);
+    setBreadCrumbs(struct);
     setEditorData(struct?.file_content || "");
   }
 
   const handleClose = (e: string) => {
     let i = 0
-    if(tabs.length == 0) {
+    if (tabs.length == 0) {
       setTabs([])
     }
     if (tabs.find((tab) => tab.file_name == e)) {
@@ -106,47 +115,57 @@ export default function Landing() {
   const matchFileExtension = (file_name: any) => {
     const split = file_name.split(".")
     const ext = split[split.length - 1]
-    if(!ext) {
+    if (!ext) {
       return <File className="pr-1" size={18} />
     }
-    switch(ext) {
+    switch (ext) {
       case "js":
-        return <FaJs size={15} color="yellow"/>
+        return <FaJs size={15} color="yellow" />
       case "jsx":
-        return <FaJs size={15} color="yellow"/>
+        return <FaJs size={15} color="yellow" />
       case "mjs":
-        return <FaJs size={15} color="yellow"/>
+        return <FaJs size={15} color="yellow" />
       case "tsx":
-        return <BiLogoTypescript size={16} color="#83b0e0"/>
+        return <BiLogoTypescript size={16} color="#83b0e0" />
       case "ts":
-        return <BiLogoTypescript size={16} color="#83b0e0"/>
+        return <BiLogoTypescript size={16} color="#83b0e0" />
       case "css":
-        return <FaCss3Alt size={16} color="#2d53e5"/>
+        return <FaCss3Alt size={16} color="#2d53e5" />
       case "png":
-        return <FaFileImage size={16} color="#aa7eed"/>
+        return <FaFileImage size={16} color="#aa7eed" />
       case "jpg":
-        return <FaFileImage size={16} color="#aa7eed"/>
+        return <FaFileImage size={16} color="#aa7eed" />
       case "jpeg":
-        return <FaFileImage size={16} color="#aa7eed"/>
+        return <FaFileImage size={16} color="#aa7eed" />
       case "rs":
-        return <FaRust size={16} color="#fa8796"/>
+        return <FaRust size={16} color="#fa8796" />
       case "toml":
-        return <FaGear size={16} color="#bfbdbe"/>
+        return <FaGear size={16} color="#bfbdbe" />
       case "json":
-        return <LuFileJson size={16} color="yellow"/>
+        return <LuFileJson size={16} color="yellow" />
       case "html":
-        return <FaHtml5 size={16} color="#994d48"/>
+        return <FaHtml5 size={16} color="#994d48" />
       case "ico":
-        return <FaStar size={16} color="yellow"/>
+        return <FaStar size={16} color="yellow" />
       case "icns":
-        return <FaStar size={16} color="yellow"/>
+        return <FaStar size={16} color="yellow" />
       case "md":
-        return <FaMarkdown size={16} color="green"/>
+        return <FaMarkdown size={16} color="green" />
       default:
         return <File className="pr-1" size={18} />
     }
   }
 
+  const setBreadCrumbs = (file_name: TabStruct) => {
+    var section: any = file_name.file_path.replace(/\\/g, '/').split("/");
+    const items = section.map((item: string, index: any) => (
+      <Anchor key={index} className="text-sm">
+        {item}
+      </Anchor>
+    ))
+    setItems(items);
+    setActiveTab(file_name.file_name);
+  }
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
@@ -200,7 +219,7 @@ export default function Landing() {
                           color="green"
                         >
                           <X width={15} />
-                        </Button>  
+                        </Button>
                       </div>
                     </Tabs.Tab>
                   )
@@ -209,6 +228,9 @@ export default function Landing() {
             </Tabs.List>
           </Tabs>
         </ScrollArea.Autosize>
+        <Breadcrumbs className="pl-4">
+          {items}
+        </Breadcrumbs>
         <ScrollArea>
           <CodeMirror
             value={editorData}
