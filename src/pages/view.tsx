@@ -9,6 +9,10 @@ import CodeMirror from '@uiw/react-codemirror';
 import { ChevronDown, File, X } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { FaJs, FaCss3Alt, FaFileImage, FaRust, FaHtml5, FaStar, FaMarkdown } from "react-icons/fa";
+import { BiLogoTypescript } from "react-icons/bi";
+import { FaGear } from "react-icons/fa6";
+import { LuFileJson } from "react-icons/lu";
 
 interface TabStruct {
   file_name: string,
@@ -57,14 +61,15 @@ export default function Landing() {
 
   const handleFileOpen = (file_path: string, file_name: any) => {
     if (tabs.find((tab) => tab.file_name == file_name)) {
-      setActiveTab(file_name);
+      handleTabChange(file_name);
       return;
     }
     invoke<string>("read_file", { path: file_path }).then((data: string) => {
       const newTab: TabStruct = { file_name: file_name, file_content: data }
-      let newTabs = [newTab, ...tabs];
+      let newTabs = [...tabs, newTab];
       setTabs(newTabs);
-      setEditorData(data);
+      setActiveTab(file_name);
+      setEditorData(newTab?.file_content || "");
     })
   };
 
@@ -79,17 +84,66 @@ export default function Landing() {
 
   const handleClose = (e: string) => {
     let i = 0
-    if (tabs.length != 1) {
+    if(tabs.length == 0) {
+      setTabs([])
+    }
+    if (tabs.find((tab) => tab.file_name == e)) {
       while (tabs[i].file_name != e) {
         i++;
       }
     }
     tabs.splice(i, 1);
-    setTabs(tabs);
-    if (tabs.length > 0) {
+    let newTabs = tabs;
+    setTabs(newTabs);
+    console.log(tabs)
+    if (tabs.length > 1) {
       handleTabChange(tabs[0].file_name);
     } else {
       setEditorData("");
+    }
+  }
+
+  const matchFileExtension = (file_name: any) => {
+    const split = file_name.split(".")
+    const ext = split[split.length - 1]
+    if(!ext) {
+      return <File className="pr-1" size={18} />
+    }
+    switch(ext) {
+      case "js":
+        return <FaJs size={15} color="yellow"/>
+      case "jsx":
+        return <FaJs size={15} color="yellow"/>
+      case "mjs":
+        return <FaJs size={15} color="yellow"/>
+      case "tsx":
+        return <BiLogoTypescript size={16} color="#83b0e0"/>
+      case "ts":
+        return <BiLogoTypescript size={16} color="#83b0e0"/>
+      case "css":
+        return <FaCss3Alt size={16} color="#2d53e5"/>
+      case "png":
+        return <FaFileImage size={16} color="#aa7eed"/>
+      case "jpg":
+        return <FaFileImage size={16} color="#aa7eed"/>
+      case "jpeg":
+        return <FaFileImage size={16} color="#aa7eed"/>
+      case "rs":
+        return <FaRust size={16} color="#fa8796"/>
+      case "toml":
+        return <FaGear size={16} color="#bfbdbe"/>
+      case "json":
+        return <LuFileJson size={16} color="yellow"/>
+      case "html":
+        return <FaHtml5 size={16} color="#994d48"/>
+      case "ico":
+        return <FaStar size={16} color="yellow"/>
+      case "icns":
+        return <FaStar size={16} color="yellow"/>
+      case "md":
+        return <FaMarkdown size={16} color="green"/>
+      default:
+        return <File className="pr-1" size={18} />
     }
   }
 
@@ -106,7 +160,7 @@ export default function Landing() {
               data={treeData}
               levelOffset={20}
               renderNode={({ node, expanded, hasChildren, elementProps }) => (
-                <Group gap={5} {...elementProps}>
+                <Group gap={10} {...elementProps} className={`${activeTab == node.label ? "bg-[#d2fcef] bg-opacity-20" : ""} ${elementProps.className}`}>
                   {hasChildren && (
                     <ChevronDown
                       size={18}
@@ -114,11 +168,11 @@ export default function Landing() {
                     />
                   )}
                   <div
-                    className="text-sm whitespace-nowrap"
+                    className="text-sm whitespace-nowrap flex items-center justify-center py-1"
                     onClick={() => !node.children && handleFileOpen(node.value, node.label)}
                   >
-                    {!node.children && <File className="translate-y-1 pr-1 mb-[0.4]" size={18} />}
-                    <span>{node.label}</span>
+                    {!node.children && matchFileExtension(node.label)}
+                    <span className={!node.children ? `ml-1` : ""}>{node.label}</span>
                   </div>
                 </Group>
               )}
@@ -133,15 +187,21 @@ export default function Landing() {
               {
                 tabs.map((tab) => {
                   return (
-                    <Tabs.Tab value={tab.file_name} className="pt-5 pb-5" key={tab.file_name}>
-                      {tab.file_name}
-                      <Button
-                        onClick={() => handleClose(tab.file_name)}
-                        variant="transparent"
-                        className="w-fit h-fit"
-                      >
-                        <X width={15} />
-                      </Button>
+                    <Tabs.Tab value={tab.file_name} key={tab.file_name} color={"green"}>
+                      <div className="flex items-center">
+                        <div className="flex">
+                          {matchFileExtension(tab.file_name)}
+                          <span className="ml-2">{tab.file_name}</span>
+                        </div>
+                        <Button
+                          onClick={() => handleClose(tab.file_name)}
+                          variant="transparent"
+                          className="w-fit h-fit"
+                          color="green"
+                        >
+                          <X width={15} />
+                        </Button>  
+                      </div>
                     </Tabs.Tab>
                   )
                 })
@@ -154,6 +214,7 @@ export default function Landing() {
             value={editorData}
             extensions={[javascript(), linter(leetLinter()), lintGutter()]}
             theme={atomone}
+            className="pb-32"
             readOnly
           />
         </ScrollArea>
