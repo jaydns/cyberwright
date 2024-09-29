@@ -98,9 +98,7 @@ fn add_line_numbers(text: &str) -> String {
 
 #[tauri::command]
 async fn get_ai_response(content: String) -> Result<String, String> {
-    // hardcoded api key lets GOOOO
-    let api_key = "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".to_string();
-    // let api_key = "ollama".to_string();
+    let api_key = "ollama".to_string();
 
     let client = reqwest::Client::new();
 
@@ -122,8 +120,7 @@ async fn get_ai_response(content: String) -> Result<String, String> {
                 "content": add_line_numbers(content.as_str())
             }
         ],
-        "model": "llama-3.1-70b-versatile", // groq
-        // "model": "llama3.1:70b", // ollama
+        "model": "llama3.1:70b", // ollama
         "temperature": 0,
         "max_tokens": 1024,
         "top_p": 1,
@@ -135,8 +132,7 @@ async fn get_ai_response(content: String) -> Result<String, String> {
     });
 
     let response = client
-        .post("https://api.groq.com/openai/v1/chat/completions")
-        // .post("http://localhost:11434/v1/chat/completions")
+        .post("http://localhost:11434/v1/chat/completions") // ollama on intel tiber cloud. ssh portforwarded
         .headers(headers)
         .json(&body)
         .send()
