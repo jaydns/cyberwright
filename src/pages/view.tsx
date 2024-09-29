@@ -64,12 +64,12 @@ export default function Landing() {
   const handleFileOpen = (file_path: string, file_name: any) => {
     const section: any = file_path.replace(/\\/g, '/').split("/");
     const items = section.map((item: string, index: any) => (
-      <Anchor key={index} className="text-sm">
+      <Anchor key={index} className="text-sm" c="green">
         {item}
       </Anchor>
     ))
     setItems(items);
-    if (tabs.find((tab) => tab.file_name == file_name)) {
+    if (tabs.find((tab) => tab.file_name == file_name && tab.file_path == file_path)) {
       handleTabChange(file_name);
       return;
     }
@@ -104,11 +104,11 @@ export default function Landing() {
     tabs.splice(i, 1);
     let newTabs = tabs;
     setTabs(newTabs);
-    console.log(tabs)
-    if (tabs.length > 1) {
-      handleTabChange(tabs[0].file_name);
+    if (tabs.length >= 1) {
+      handleTabChange(tabs[tabs.length - 1].file_name);
     } else {
       setEditorData("");
+      setItems([])
     }
   }
 
@@ -159,7 +159,7 @@ export default function Landing() {
   const setBreadCrumbs = (file_name: TabStruct) => {
     var section: any = file_name.file_path.replace(/\\/g, '/').split("/");
     const items = section.map((item: string, index: any) => (
-      <Anchor key={index} className="text-sm">
+      <Anchor key={index} className="text-sm" c="green">
         {item}
       </Anchor>
     ))
@@ -200,9 +200,10 @@ export default function Landing() {
         )}
       </div>
       <div className="w-4/5 h-screen flex flex-col bg-[#272c35]">
-        <ScrollArea.Autosize className="pb-3">
+        <ScrollArea className="min-h-16" scrollbarSize={0}>
+        <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
           <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
-            <Tabs.List>
+            <Tabs.List className="flex-nowrap">
               {
                 tabs.map((tab) => {
                   return (
@@ -215,7 +216,7 @@ export default function Landing() {
                         <Button
                           onClick={() => handleClose(tab.file_name)}
                           variant="transparent"
-                          className="w-fit h-fit"
+                          className="w-fit h-fit pr-0"
                           color="green"
                         >
                           <X width={15} />
@@ -227,16 +228,17 @@ export default function Landing() {
               }
             </Tabs.List>
           </Tabs>
-        </ScrollArea.Autosize>
+        </div>
+        </ScrollArea>
         <Breadcrumbs className="pl-4">
           {items}
         </Breadcrumbs>
-        <ScrollArea>
+        <ScrollArea className="">
           <CodeMirror
             value={editorData}
             extensions={[javascript(), linter(leetLinter()), lintGutter()]}
             theme={atomone}
-            className="pb-32"
+            className="pb-52"
             readOnly
           />
         </ScrollArea>
