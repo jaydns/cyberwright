@@ -17,6 +17,7 @@ import { FaGear } from "react-icons/fa6";
 import { LuFileJson } from "react-icons/lu";
 import { useRouter } from "next/router";
 import { notifications } from "@mantine/notifications";
+import React from "react";
 
 interface TabStruct {
   file_name: string,
@@ -73,6 +74,9 @@ export default function Landing() {
   };
 
   const handleFileOpen = (file_path: string, file_name: any) => {
+    if(file_name === activeTab) {
+      return;
+    }
     setOpenLoader(true);
     const section: any = file_path.replace(/\\/g, '/').split("/");
     const items = section.map((item: string, index: any) => (
@@ -121,6 +125,9 @@ export default function Landing() {
   }, [editorData])
 
   const handleTabChange = (file_name: any) => {
+    if(activeTab == file_name) {
+      return;
+    }
     let struct = tabs.find((tab) => tab.file_name == file_name);
     if (!struct) {
       return
@@ -149,6 +156,7 @@ export default function Landing() {
       setItems([])
       setActiveTab("")
       setDiagnostics([])
+      setOpenLoader(false)
     }
   }
 
@@ -316,7 +324,8 @@ export default function Landing() {
           </Button>
           <Collapse in={opened} className={`h-full bg-black mt-0 pt-3 ${opened ? "pointer-events-auto" : ""}`}>
 
-            {diagnosticsLoading ? (<>
+            {diagnosticsLoading ? (
+            <>
               <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
                 <h1>Analyzing...</h1>
                 <Progress className={"w-1/2"} color="green" size="xl" value={100} animated />
