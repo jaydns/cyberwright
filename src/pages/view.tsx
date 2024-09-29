@@ -1,12 +1,14 @@
+import { leetLinter } from "@/1337source";
 import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
-import { Group, Tree, TreeNodeData, ScrollArea, Tabs, Button } from '@mantine/core';
+import { linter, lintGutter } from '@codemirror/lint';
+import { Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { invoke } from "@tauri-apps/api/tauri";
+import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
 import { ChevronDown, File, X } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { atomone } from '@uiw/codemirror-theme-atomone';
 
 interface TabStruct {
   file_name: string,
@@ -54,7 +56,7 @@ export default function Landing() {
   };
 
   const handleFileOpen = (file_path: string, file_name: any) => {
-    if(tabs.find((tab) => tab.file_name == file_name)) {
+    if (tabs.find((tab) => tab.file_name == file_name)) {
       setActiveTab(file_name);
       return;
     }
@@ -68,7 +70,7 @@ export default function Landing() {
 
   const handleTabChange = (file_name: any) => {
     let struct = tabs.find((tab) => tab.file_name == file_name);
-    if(!struct) {
+    if (!struct) {
       return
     }
     setActiveTab(file_name);
@@ -77,14 +79,14 @@ export default function Landing() {
 
   const handleClose = (e: string) => {
     let i = 0
-    if(tabs.length != 1) {
-      while(tabs[i].file_name != e) {
+    if (tabs.length != 1) {
+      while (tabs[i].file_name != e) {
         i++;
       }
     }
     tabs.splice(i, 1);
     setTabs(tabs);
-    if(tabs.length > 0) {
+    if (tabs.length > 0) {
       handleTabChange(tabs[0].file_name);
     } else {
       setEditorData("");
@@ -133,12 +135,12 @@ export default function Landing() {
                   return (
                     <Tabs.Tab value={tab.file_name} className="pt-5 pb-5" key={tab.file_name}>
                       {tab.file_name}
-                      <Button 
+                      <Button
                         onClick={() => handleClose(tab.file_name)}
                         variant="transparent"
                         className="w-fit h-fit"
                       >
-                        <X width={15}/>
+                        <X width={15} />
                       </Button>
                     </Tabs.Tab>
                   )
@@ -148,9 +150,9 @@ export default function Landing() {
           </Tabs>
         </ScrollArea.Autosize>
         <ScrollArea>
-          <CodeMirror 
-            value={editorData} 
-            extensions={[javascript()]} 
+          <CodeMirror
+            value={editorData}
+            extensions={[javascript(), linter(leetLinter()), lintGutter()]}
             theme={atomone}
             readOnly
           />

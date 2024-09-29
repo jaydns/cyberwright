@@ -12,6 +12,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/language": "^6.10.3",
+    "@codemirror/lint": "^6.8.2",
     "@emotion/react": "^11.13.3",
     "@emotion/server": "^11.11.0",
     "@mantine/core": "^7.13.0",
