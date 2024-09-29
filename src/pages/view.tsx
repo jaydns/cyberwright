@@ -329,7 +329,14 @@ export default function Landing() {
             }
           </Button>
           <Collapse in={opened} className={`h-full bg-black mt-0 pt-3 ${opened ? "pointer-events-auto" : ""}`}>
-            <h1 className="ml-10 text-2xl"><u>Vulnerabilities Identified</u></h1>
+            {
+              diagnostics.length > 0 ? 
+              <h1 className="ml-10 text-2xl"><u>Vulnerabilities Identified</u></h1>
+              :
+              <div className="items-center justify-center flex text-center">
+                  <h1>No issues found!</h1>
+                </div>
+            }
             {diagnosticsLoading ? (
             <>
               <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
@@ -338,12 +345,8 @@ export default function Landing() {
               </div>
             </>
             ) : (
-              diagnostics.length == 0 ? (
-                <div className="flex flex-col h-full items-center justify-center text-center">
-                  <h1>No issues found!</h1>
-                </div>
-              ) : (
-                <ScrollArea className="h-full pointer-events-auto pb-20" h={"90%"} scrollbars="y">
+              diagnostics.length != 0 && (
+                <ScrollArea className="h-full pointer-events-auto pb-20" h={"95%"} scrollbars="y">
                   {diagnostics.map((diag, index) => {
                     return (
                       <AiDialog key={index + 1} content={diag.message} id={index + 1} severity={diag.severity}/>

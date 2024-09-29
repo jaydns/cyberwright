@@ -21,7 +21,7 @@ export default function Home() {
       }
       setRecentOpens(data.filter((obj1, i, arr) =>
         arr.findIndex(obj2 => (obj2.folder_path === obj1.folder_path)) === i
-      ).slice(0, 3));
+      ).reverse().slice(0, 3));
     })
   }, []);
 
