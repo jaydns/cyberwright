@@ -4,3 +4,8 @@ export interface FileStructure {
   full_path: string;
   children: FileStructure[] | null;
 }
+
+export interface dialog {
+  content: string,
+  id: number
+}

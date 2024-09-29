@@ -10,6 +10,15 @@ const config: Config = {
     colors: {
       "mint-green": "#1fd698",
     },
+    keyframes: {
+      disappearTopBottom: {
+        '0%': { transform: 'translateY(0)', opacity: '1' },
+        '100%': { transform: 'translateY(100%)', opacity: '0' },
+      },
+    },
+    animation: {
+      disappearTopBottom: 'disappearTopBottom 2s ease-out forwards',
+    },
     extend: {
       colors: {
         background: "var(--background)",

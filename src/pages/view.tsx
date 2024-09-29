@@ -2,17 +2,20 @@ import { leetLinter } from "@/1337source";
 import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
 import { linter, lintGutter } from '@codemirror/lint';
-import { Anchor, Breadcrumbs, Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
+import { Anchor, Breadcrumbs, Button, Collapse, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
 import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
-import { ChevronDown, File, X } from "lucide-react";
+import { ChevronDown, File, X, Plus, Minus } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BiLogoTypescript } from "react-icons/bi";
 import { FaCss3Alt, FaFileImage, FaHtml5, FaJs, FaMarkdown, FaRust, FaStar } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
+import { useDisclosure } from '@mantine/hooks';
 import { LuFileJson } from "react-icons/lu";
+import { dialog } from "@/types";
+import AiDialog from "@/components/aiDialog";
 
 interface TabStruct {
   file_name: string,
@@ -30,6 +33,7 @@ export default function Landing() {
   const [tabs, setTabs] = useState<TabStruct[]>([]);
   const [activeTab, setActiveTab] = useState("");
   const [items, setItems] = useState([]);
+  const [opened, { toggle }] = useDisclosure(true);
 
   useEffect(() => {
     if (!dirPath) return;
@@ -166,6 +170,12 @@ export default function Landing() {
     setItems(items);
     setActiveTab(file_name.file_name);
   }
+
+  const diag: dialog = {
+    content: "dwljdaljdajwjdwkakdwak",
+    id: 1
+  }
+  
   return (
     <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
@@ -200,7 +210,7 @@ export default function Landing() {
         )}
       </div>
       <div className="w-4/5 h-screen flex flex-col bg-[#272c35]">
-        <ScrollArea className="min-h-16" scrollbarSize={0}>
+        <ScrollArea className={`${tabs.length == 0 ? "" : "min-h-16"}`} scrollbarSize={0}>
         <div className={`pb-1 ${tabs.length == 0 ? "" : "min-h-16"}`}>
           <Tabs allowTabDeactivation value={activeTab} onChange={(val) => handleTabChange(val)} keepMounted={false}>
             <Tabs.List className="flex-nowrap">
@@ -242,10 +252,41 @@ export default function Landing() {
             readOnly
           />
         </ScrollArea>
-        <div className="h-1/5 mb-0 mt-0 bg-[#121212] w-4/5 fixed bottom-0">
-          <h1 className="text-center">D1 YAPPING</h1>
+        <div className="fixed bottom-0 w-4/5 h-2/4">
+          <Button onClick={toggle} className={`mb-0 rounded-tr-lg ${!opened ? "absolute bottom-0 transition-all duration-200" : ""}`} color="black">
+            {
+              opened ? 
+              <Minus color="#1fd698"/> :
+              <Plus color="#1fd698"/> 
+            }
+          </Button>
+          <Collapse in={opened} className="h-full bg-black mt-0 pt-3">
+              <div className="flex flex-col h-full items-center justify-center text-center -translate-y-10">
+                <h1>You haven't scanned this file yet! Click to scan.</h1>
+                <Button
+                  className=""
+                  color="green"
+                  size="lg"
+                >
+                  Scan Now
+                </Button>
+              </div>
+              <ScrollArea className="mx-20 max-w-full hidden" h={300}>
+                <AiDialog {...diag}/>
+                <AiDialog {...diag}/>
+                <AiDialog {...diag}/>
+                <AiDialog {...diag}/>
+                <AiDialog {...diag}/>
+                <AiDialog {...diag}/>
+              </ScrollArea>
+          </Collapse>
         </div>
       </div>
     </div>
   );
 }
+
+
+// TODO:
+// Syntax highlighting by matching file exts
+// Go back to home page arrow
