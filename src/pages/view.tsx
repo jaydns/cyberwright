@@ -3,7 +3,7 @@ import { FileStructure } from "@/types";
 import { javascript } from '@codemirror/lang-javascript';
 import { linter, lintGutter } from '@codemirror/lint';
 import { Anchor, Breadcrumbs, Button, Group, ScrollArea, Tabs, Tree, TreeNodeData } from '@mantine/core';
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { atomone } from '@uiw/codemirror-theme-atomone';
 import CodeMirror from '@uiw/react-codemirror';
 import { ChevronDown, File, X } from "lucide-react";
