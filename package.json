@@ -19,6 +19,7 @@
     "@mantine/next": "^6.0.22",
     "@monaco-editor/react": "^4.6.0",
     "@tauri-apps/api": "^1.6.0",
+    "@uiw/codemirror-theme-atomone": "^4.23.3",
     "@uiw/react-codemirror": "^4.23.3",
     "lucide-react": "^0.446.0",
     "monaco-editor": "^0.52.0",
