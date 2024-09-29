@@ -9,7 +9,7 @@ export default function Landing() {
     updateIsRotated(isRotated + 1);
   };
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row h-screen">
       <div className="flex w-1/5 bg-transparent flex-col pl-2 pt-1 pr-2">
         <div className="text-lg border-b-2 border-neutral-450 pl-1">
           <div className="flex justify-between">
@@ -28,14 +28,18 @@ export default function Landing() {
           </div>
         </div>
       </div>
-      <Editor
-        height="100vh"
-        defaultLanguage="javascript"
-        defaultValue="// some comment"
-        theme="vs-dark"
-        className="w-4/5"
-        options={{ readOnly: true }}
-      />
+      <div className="w-4/5 h-screen flex flex-col">
+        <Editor
+          className="mb-0"
+          defaultLanguage="javascript"
+          defaultValue="// some comment"
+          theme="vs-dark"
+          options={{ readOnly: true }}
+        />
+        <div className="h-1/5 mb-0 mt-0 bg-[#121212]">
+          <h1 className="text-center">D1 YAPPING</h1>
+        </div>
+      </div>
     </div>
   );
 }

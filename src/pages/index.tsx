@@ -13,6 +13,9 @@ export default function Home() {
       directory: true,
       multiple: false
     }).then((selected: any) => {
+      if(!selected) {
+        return;
+      }
       router.push(`/view?path=${encodeURI(selected)}`)
     })
   };
