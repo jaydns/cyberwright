@@ -54,6 +54,11 @@ fn get_file_structure(path: String) -> Result<FileNode, String> {
     build_file_structure(Path::new(&path)).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn read_file(path: String) -> Result<String, String> {
+    fs::read_to_string(path).map_err(|e| e.to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -69,7 +74,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_file_structure])
+        .invoke_handler(tauri::generate_handler![get_file_structure, read_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
