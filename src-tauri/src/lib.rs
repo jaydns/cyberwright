@@ -87,6 +87,14 @@ fn read_file(path: String) -> Result<String, String> {
     fs::read_to_string(path).map_err(|e| e.to_string())
 }
 
+fn add_line_numbers(text: &str) -> String {
+    text.lines()
+        .enumerate()
+        .map(|(i, line)| format!("{:4} {}", i + 1, line))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
 #[tauri::command]
 fn get_ai_response(content: String) -> Result<String, String> {
     let runtime = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
@@ -109,11 +117,11 @@ fn get_ai_response(content: String) -> Result<String, String> {
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are an application that identifies vulnerabilities in code.\nIgnore vulnerabilities that cannot be exploited, or are negligible.\n\nReturn JSON in the following format:\n\n{\n    \"issues\": [\n        { \"lineNumber\": 1, \"severity\": \"warning\" | \"critical\", \"synopsis: \"A short description of the vulnerability, including suggested remediation. Include the function signature or responsible code, in backticks, if applicable.\" }\n    ]\n}"
+                    "content": "You are an application that identifies vulnerabilities in code.\nIgnore vulnerabilities that cannot be exploited, or are negligible.\nLine numbers are included in your input.\n\nReturn JSON in the following format:\n\n{\n    \"issues\": [\n        { \"lineNumber\": 1, \"severity\": \"warning\" | \"critical\", \"synopsis: \"A short description of the vulnerability, including suggested remediation. Include the function signature or responsible code, in backticks, if applicable.\" }\n    ]\n}"
                 },
                 {
                     "role": "user",
-                    "content": content
+                    "content": add_line_numbers(content.as_str())
                 }
             ],
             "model": "llama-3.1-70b-versatile", // groq
